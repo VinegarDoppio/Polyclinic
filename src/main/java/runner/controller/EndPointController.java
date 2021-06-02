@@ -2,6 +2,7 @@ package runner.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import runner.entity.Appeal;
+import runner.entity.Conclusion;
 import runner.entity.Doctors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,10 +31,13 @@ public class EndPointController {
     public ResponseEntity<List<Doctors>> get() {
         List<Patients> patients = this.patientsService.read();
         int count = 0;
-        List<Doctors> doctors = new ArrayList<>();
+        List<Doctors> doctors = new ArrayList<>( );
         List<Doctors> doctorsAll = new ArrayList<>();
+        List<Conclusion> conclusions = new ArrayList<>();
         for (Patients patients1 : patients) {
-            doctors.add((Doctors) patients1.getAppeals());
+            for(Conclusion conclusion1 : conclusions){
+                doctors.add(patients1.getAppeals(conclusion1.getDoctors()));
+            }
         }
         for (Doctors doctor : doctors) {
             for (Doctors doctors1 : doctors) {
@@ -50,26 +54,5 @@ public class EndPointController {
         return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return  new ResponseEntity<>(doctorsAll, HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> put(@RequestBody Doctors entity) {
-        doctorsService.save(entity);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> post(@RequestBody Doctors entity) {
-        doctorsService.save(entity);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable int id) {
-        doctorsService.delete(id);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
